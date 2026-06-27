@@ -2,7 +2,7 @@
 <html lang="zh-CN">
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <title>安全科学计算器</title>
     <link rel="stylesheet" href="styles.css">
   </head>
@@ -19,8 +19,8 @@
               <span aria-hidden="true">H</span>
             </button>
           </div>
-          <label class="sr-only" for="expression">表达式</label>
-          <input id="expression" class="expression" autocomplete="off" spellcheck="false" inputmode="none" readonly aria-readonly="true" placeholder="使用下方按钮输入表达式">
+          <div class="sr-only" id="expressionLabel">表达式</div>
+          <div id="expression" class="expression" role="textbox" aria-labelledby="expressionLabel" aria-readonly="true" tabindex="-1" data-placeholder="使用下方按钮输入表达式"></div>
           <div class="result-row">
             <output id="result" class="result">0</output>
             <span id="status" class="status">就绪</span>
@@ -77,6 +77,6 @@
         <ol id="historyList" class="history-list"></ol>
       </aside>
     </main>
-    <script src="app.js?v=1.0.3"></script>
+    <script src="app.js?v=1.0.4"></script>
   </body>
 </html>
