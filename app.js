@@ -284,7 +284,6 @@ function insertText(text) {
   const end = expressionInput.selectionEnd ?? expressionInput.value.length;
   expressionInput.value = `${expressionInput.value.slice(0, start)}${text}${expressionInput.value.slice(end)}`;
   const cursor = start + text.length;
-  expressionInput.focus();
   expressionInput.setSelectionRange(cursor, cursor);
 }
 
@@ -342,7 +341,6 @@ document.querySelector(".keypad").addEventListener("click", (event) => {
     expressionInput.value = "";
     resultOutput.textContent = "0";
     setStatus("已清空");
-    expressionInput.focus();
   }
   if (button.dataset.action === "delete") {
     const start = expressionInput.selectionStart ?? expressionInput.value.length;
@@ -354,7 +352,6 @@ document.querySelector(".keypad").addEventListener("click", (event) => {
       expressionInput.value = `${expressionInput.value.slice(0, start - 1)}${expressionInput.value.slice(start)}`;
       expressionInput.setSelectionRange(start - 1, start - 1);
     }
-    expressionInput.focus();
   }
   if (button.dataset.action === "evaluate") evaluateCurrentExpression();
 });
