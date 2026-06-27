@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>安全科学计算器</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="calculator-shell">
+      <section class="calculator" aria-label="安全科学计算器">
+        <header class="display-panel">
+          <div class="brand-row">
+            <div>
+              <p class="eyebrow">Safe Scientific</p>
+              <h1>安全科学计算器</h1>
+            </div>
+            <button class="icon-button" id="historyToggle" type="button" title="历史记录" aria-label="历史记录">
+              <span aria-hidden="true">H</span>
+            </button>
+          </div>
+          <label class="sr-only" for="expression">表达式</label>
+          <input id="expression" class="expression" autocomplete="off" spellcheck="false" inputmode="decimal" placeholder="输入表达式，例如 2pi + sqrt(9)">
+          <div class="result-row">
+            <output id="result" class="result">0</output>
+            <span id="status" class="status">就绪</span>
+          </div>
+        </header>
+
+        <section class="keypad" aria-label="计算器按键">
+          <button class="key utility" type="button" data-action="clear">AC</button>
+          <button class="key utility" type="button" data-action="delete">⌫</button>
+          <button class="key utility" type="button" data-insert="(">(</button>
+          <button class="key utility" type="button" data-insert=")">)</button>
+
+          <button class="key function" type="button" data-insert="sin(">sin</button>
+          <button class="key function" type="button" data-insert="cos(">cos</button>
+          <button class="key function" type="button" data-insert="tan(">tan</button>
+          <button class="key operator" type="button" data-insert="^">^</button>
+
+          <button class="key function" type="button" data-insert="sqrt(">sqrt</button>
+          <button class="key function" type="button" data-insert="log(">log</button>
+          <button class="key function" type="button" data-insert="log10(">log10</button>
+          <button class="key operator" type="button" data-insert="/">÷</button>
+
+          <button class="key" type="button" data-insert="7">7</button>
+          <button class="key" type="button" data-insert="8">8</button>
+          <button class="key" type="button" data-insert="9">9</button>
+          <button class="key operator" type="button" data-insert="*">×</button>
+
+          <button class="key" type="button" data-insert="4">4</button>
+          <button class="key" type="button" data-insert="5">5</button>
+          <button class="key" type="button" data-insert="6">6</button>
+          <button class="key operator" type="button" data-insert="-">−</button>
+
+          <button class="key" type="button" data-insert="1">1</button>
+          <button class="key" type="button" data-insert="2">2</button>
+          <button class="key" type="button" data-insert="3">3</button>
+          <button class="key operator" type="button" data-insert="+">+</button>
+
+          <button class="key function" type="button" data-insert="pi">π</button>
+          <button class="key" type="button" data-insert="0">0</button>
+          <button class="key" type="button" data-insert=".">.</button>
+          <button class="key equals" type="button" data-action="evaluate">=</button>
+
+          <button class="key function wide" type="button" data-insert="fact(">fact</button>
+          <button class="key function" type="button" data-insert="ans">ans</button>
+          <button class="key function" type="button" data-insert="e">e</button>
+        </section>
+      </section>
+
+      <aside class="history-panel" id="historyPanel" aria-label="历史记录">
+        <div class="history-header">
+          <h2>历史记录</h2>
+          <button class="text-button" type="button" id="clearHistory">清空</button>
+        </div>
+        <ol id="historyList" class="history-list"></ol>
+      </aside>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>
