@@ -287,6 +287,31 @@ function insertText(text) {
   expressionInput.setSelectionRange(cursor, cursor);
 }
 
+function deleteSmart() {
+  const start = expressionInput.selectionStart ?? expressionInput.value.length;
+  const end = expressionInput.selectionEnd ?? expressionInput.value.length;
+
+  if (start !== end) {
+    expressionInput.value = `${expressionInput.value.slice(0, start)}${expressionInput.value.slice(end)}`;
+    expressionInput.setSelectionRange(start, start);
+    return;
+  }
+
+  if (start <= 0) return;
+
+  const beforeCursor = expressionInput.value.slice(0, start);
+  const functionMatch = beforeCursor.match(/([a-zA-Z][a-zA-Z0-9]*)\($/);
+  if (functionMatch && Object.hasOwn(FUNCTIONS, functionMatch[1].toLowerCase())) {
+    const deleteStart = start - functionMatch[0].length;
+    expressionInput.value = `${expressionInput.value.slice(0, deleteStart)}${expressionInput.value.slice(start)}`;
+    expressionInput.setSelectionRange(deleteStart, deleteStart);
+    return;
+  }
+
+  expressionInput.value = `${expressionInput.value.slice(0, start - 1)}${expressionInput.value.slice(start)}`;
+  expressionInput.setSelectionRange(start - 1, start - 1);
+}
+
 function setStatus(message, isError = false) {
   statusText.textContent = message;
   statusText.classList.toggle("error", isError);
@@ -343,15 +368,7 @@ document.querySelector(".keypad").addEventListener("click", (event) => {
     setStatus("已清空");
   }
   if (button.dataset.action === "delete") {
-    const start = expressionInput.selectionStart ?? expressionInput.value.length;
-    const end = expressionInput.selectionEnd ?? expressionInput.value.length;
-    if (start !== end) {
-      expressionInput.value = `${expressionInput.value.slice(0, start)}${expressionInput.value.slice(end)}`;
-      expressionInput.setSelectionRange(start, start);
-    } else if (start > 0) {
-      expressionInput.value = `${expressionInput.value.slice(0, start - 1)}${expressionInput.value.slice(start)}`;
-      expressionInput.setSelectionRange(start - 1, start - 1);
-    }
+    deleteSmart();
   }
   if (button.dataset.action === "evaluate") evaluateCurrentExpression();
 });
