@@ -35,15 +35,18 @@ const FUNCTIONS = {
   fact: safeFactorial,
 };
 
-const expressionInput = document.querySelector("#expression");
+const expressionDisplay = document.querySelector("#expression");
 const resultOutput = document.querySelector("#result");
 const statusText = document.querySelector("#status");
 const historyList = document.querySelector("#historyList");
 const historyPanel = document.querySelector("#historyPanel");
 const historyToggle = document.querySelector("#historyToggle");
 const clearHistoryButton = document.querySelector("#clearHistory");
+const keypad = document.querySelector(".keypad");
 let ansValue = 0;
+let expressionValue = "";
 let history = [];
+let activePointerId = null;
 
 class Parser {
   constructor(tokens, ans) {
@@ -279,37 +282,27 @@ function formatResult(value) {
   return Number(value.toPrecision(14)).toString();
 }
 
+function renderExpression() {
+  expressionDisplay.textContent = expressionValue;
+}
+
 function insertText(text) {
-  const start = expressionInput.selectionStart ?? expressionInput.value.length;
-  const end = expressionInput.selectionEnd ?? expressionInput.value.length;
-  expressionInput.value = `${expressionInput.value.slice(0, start)}${text}${expressionInput.value.slice(end)}`;
-  const cursor = start + text.length;
-  expressionInput.setSelectionRange(cursor, cursor);
+  expressionValue = `${expressionValue}${text}`;
+  renderExpression();
 }
 
 function deleteSmart() {
-  const start = expressionInput.selectionStart ?? expressionInput.value.length;
-  const end = expressionInput.selectionEnd ?? expressionInput.value.length;
+  if (!expressionValue) return;
 
-  if (start !== end) {
-    expressionInput.value = `${expressionInput.value.slice(0, start)}${expressionInput.value.slice(end)}`;
-    expressionInput.setSelectionRange(start, start);
-    return;
-  }
-
-  if (start <= 0) return;
-
-  const beforeCursor = expressionInput.value.slice(0, start);
-  const functionMatch = beforeCursor.match(/([a-zA-Z][a-zA-Z0-9]*)\($/);
+  const functionMatch = expressionValue.match(/([a-zA-Z][a-zA-Z0-9]*)\($/);
   if (functionMatch && Object.hasOwn(FUNCTIONS, functionMatch[1].toLowerCase())) {
-    const deleteStart = start - functionMatch[0].length;
-    expressionInput.value = `${expressionInput.value.slice(0, deleteStart)}${expressionInput.value.slice(start)}`;
-    expressionInput.setSelectionRange(deleteStart, deleteStart);
+    expressionValue = expressionValue.slice(0, -functionMatch[0].length);
+    renderExpression();
     return;
   }
 
-  expressionInput.value = `${expressionInput.value.slice(0, start - 1)}${expressionInput.value.slice(start)}`;
-  expressionInput.setSelectionRange(start - 1, start - 1);
+  expressionValue = expressionValue.slice(0, -1);
+  renderExpression();
 }
 
 function setStatus(message, isError = false) {
@@ -317,14 +310,17 @@ function setStatus(message, isError = false) {
   statusText.classList.toggle("error", isError);
 }
 
+function vibrateLightly() {
+  globalThis.navigator?.vibrate?.(8);
+}
+
 function evaluateCurrentExpression() {
   try {
-    const expression = expressionInput.value;
-    const value = evaluateExpression(expression, ansValue);
+    const value = evaluateExpression(expressionValue, ansValue);
     ansValue = value;
     resultOutput.textContent = formatResult(value);
     setStatus("已计算");
-    history.unshift({ expression, result: formatResult(value) });
+    history.unshift({ expression: expressionValue, result: formatResult(value) });
     history = history.slice(0, 30);
     renderHistory();
   } catch (error) {
@@ -351,19 +347,20 @@ function renderHistory() {
     result.textContent = entry.result;
     item.append(expression, result);
     item.addEventListener("click", () => {
-      expressionInput.value = entry.expression;
+      expressionValue = entry.expression;
+      renderExpression();
       resultOutput.textContent = entry.result;
     });
     historyList.append(item);
   });
 }
 
-document.querySelector(".keypad").addEventListener("click", (event) => {
-  const button = event.target.closest("button");
-  if (!button) return;
+function handleKey(button) {
+  vibrateLightly();
   if (button.dataset.insert) insertText(button.dataset.insert);
   if (button.dataset.action === "clear") {
-    expressionInput.value = "";
+    expressionValue = "";
+    renderExpression();
     resultOutput.textContent = "0";
     setStatus("已清空");
   }
@@ -371,11 +368,33 @@ document.querySelector(".keypad").addEventListener("click", (event) => {
     deleteSmart();
   }
   if (button.dataset.action === "evaluate") evaluateCurrentExpression();
+}
+
+keypad.addEventListener("pointerdown", (event) => {
+  if (activePointerId !== null) {
+    event.preventDefault();
+    return;
+  }
+  const button = event.target.closest("button");
+  if (!button) return;
+  activePointerId = event.pointerId;
+  event.preventDefault();
+  button.setPointerCapture?.(event.pointerId);
+  handleKey(button);
 });
 
-expressionInput.addEventListener("keydown", (event) => {
-  if (event.key === "Enter") evaluateCurrentExpression();
+keypad.addEventListener("pointerup", (event) => {
+  if (event.pointerId === activePointerId) activePointerId = null;
 });
+
+keypad.addEventListener("pointercancel", (event) => {
+  if (event.pointerId === activePointerId) activePointerId = null;
+});
+
+keypad.addEventListener("contextmenu", (event) => event.preventDefault());
+document.addEventListener("gesturestart", (event) => event.preventDefault());
+document.addEventListener("dblclick", (event) => event.preventDefault());
+document.addEventListener("contextmenu", (event) => event.preventDefault());
 
 historyToggle.addEventListener("click", () => {
   historyPanel.classList.toggle("open");
@@ -387,4 +406,5 @@ clearHistoryButton.addEventListener("click", () => {
 });
 
 window.safeCalculator = { evaluateExpression };
+renderExpression();
 renderHistory();
